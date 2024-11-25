@@ -5,7 +5,6 @@ import time
 
 class ScrabbleGame:
     def __init__(self):
-        # Tile bag: letter frequencies and scores
         self.tile_bag = {
             'A': 9, 'B': 2, 'C': 2, 'D': 4, 'E': 12,
             'F': 2, 'G': 3, 'H': 2, 'I': 9, 'J': 1,
@@ -21,30 +20,25 @@ class ScrabbleGame:
             'U': 1, 'V': 4, 'W': 4, 'X': 8, 'Y': 4, 'Z': 10
         }
         self.remaining_tiles = sum(self.tile_bag.values())
-        self.word_cache = {}  # Cache for validated words
+        self.word_cache = {} 
 
     def is_valid_dictionary_word(self, word):
         """Check if the word exists in the dictionary using the Free Dictionary API."""
-        # Check cache first
         if word in self.word_cache:
             return self.word_cache[word]
 
         try:
-            # Free Dictionary API
             url = f"https://api.dictionaryapi.dev/api/v2/entries/en/{word.lower()}"
             response = requests.get(url)
             
-            # Cache and return result
             is_valid = response.status_code == 200
             self.word_cache[word] = is_valid
             
-            # Add a small delay to avoid hitting API rate limits
             time.sleep(0.5)
             
             return is_valid
         except requests.RequestException as e:
             print(f"Warning: Could not verify word due to API error: {e}")
-            # If API is down, we'll accept the word but warn the user
             return True
 
     def draw_tiles(self, count):
@@ -84,7 +78,6 @@ class ScrabbleGame:
         """Check if word can be formed from player's tiles and exists in dictionary."""
         word_upper = word.upper()
         
-        # First check if the word can be formed from tiles
         player_counter = Counter(player_tiles)
         word_counter = Counter(word_upper)
         
@@ -92,7 +85,6 @@ class ScrabbleGame:
             if count > player_counter.get(letter, 0):
                 return False, "Cannot form this word with your tiles!"
 
-        # Then check if it's a valid dictionary word
         if not self.is_valid_dictionary_word(word):
             return False, "Not a valid word in the dictionary!"
             
@@ -140,17 +132,14 @@ def main():
                 print("Please enter only letters.")
                 continue
                 
-            # Check word validity
             is_valid, message = game.is_valid_word(word, player_tiles)
             if not is_valid:
                 print(message)
                 continue
             
-            # Calculate score and update player's tiles
             word_score = game.calculate_score(word)
             player_score += word_score
             
-            # Remove used tiles and replenish
             used_tiles = list(word.upper())
             remaining_tiles = [t for t in player_tiles]
             for letter in used_tiles:
@@ -171,6 +160,7 @@ def main():
         print(f"\nAn error occurred: {e}")
     
     print(f"\nFinal score: {player_score}")
+
 
 if __name__ == "__main__":
     main()
